@@ -1,3 +1,0 @@
-/home/fb/my_webserver/build/CMakeFiles/my_webServer.dir
-/home/fb/my_webserver/build/CMakeFiles/edit_cache.dir
-/home/fb/my_webserver/build/CMakeFiles/rebuild_cache.dir
