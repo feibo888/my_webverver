@@ -20,7 +20,8 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool OptLinger,
     strncat(srcDir, "/../resources/", 16);
 
     //usercount原子操作，存储当前连接的用户数量
-    HttpConn::userCount.store(0);
+    //HttpConn::userCount.store(0);
+    HttpConn::userCount = 0;
     HttpConn::srcDir = this->srcDir;
 
     //初始化连接池
@@ -122,7 +123,7 @@ bool WebServer::InitSocket_()
     {
         //优雅关闭，直到所剩数据发送完毕或超时
         optLinger.l_onoff = 1;      //关闭套机字时阻塞，并尝试发送未发送完的数据
-        optLinger.l_linger = 0;     //设置这个发送行为的超时时间为0s
+        optLinger.l_linger = 1;     //设置这个发送行为的超时时间为0s
     }
 
     listenFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -241,7 +242,7 @@ void WebServer::DealListen_()
             return;
         }
         AddClient_(fd, addr);
-    }while (listenEvent & EPOLLIN);
+    }while (listenEvent & EPOLLET);
 }
 
 void WebServer::DealWrite_(HttpConn* client)

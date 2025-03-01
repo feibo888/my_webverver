@@ -4,17 +4,20 @@
 
 #ifndef LOG_H
 #define LOG_H
+
 #include <mutex>
+#include <string>
 #include <thread>
-#include "../buffer/buffer.h"
+#include <sys/time.h>
+#include <string.h>
+#include <stdarg.h>           // vastart va_end
+#include <assert.h>
+#include <sys/stat.h>         //mkdir
 #include "blockqueue.h"
-#include <iostream>
+#include "../buffer/buffer.h"
 #include <fstream>
 
-#include <sys/time.h>
-
-
-
+//log.h:
 
 class Log
 {
@@ -61,19 +64,19 @@ private:
     int level_;
 
 
-    FILE* fp_;
+
+    //FILE* fp_;
     std::ofstream file_;
 
 };
 
 #define LOG_BASE(level, format, ...) \
-    do{\
-        Log* log = Log::Instance();\
-        if(log->isOpen() && log->GetLevel() <= level){\
-            log->write(level, format, ##__VA_ARGS__);\
-            log->flush();\
-        }\
-    }while(0);
+do{\
+Log* log = Log::Instance();\
+if(log->isOpen() && log->GetLevel() <= level){\
+log->write(level, format, ##__VA_ARGS__);\
+}\
+}while(0);
 
 #define LOG_DEBUG(format, ...) do{LOG_BASE(0, format, ##__VA_ARGS__)}while(0);
 #define LOG_INFO(format, ...) do{LOG_BASE(1, format, ##__VA_ARGS__)}while(0);

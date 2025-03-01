@@ -9,7 +9,7 @@ const unordered_map<string, string> HttpResponse::SUFFIX_TYPE =
 {
     {".html", "text/html"},
     {".xml", "text/xml"},
-    {"xhtml", "application/xhtml+xml"},
+    {".xhtml", "application/xhtml+xml"},
     {".txt", "text/plain"},
     {".rtf", "application/rtf"},
     {".pdf", "application/pdf"},
@@ -122,7 +122,7 @@ void HttpResponse::ErrorContent(Buffer& buff, std::string message)
 {
     string body;
     string status;
-    body += "<html><title>Error<title>";
+    body += "<html><title>Error</title>";
     body += "<body bgcolor=\"ffffff\">";
     if (CODE_STATUS.count(code_) == 1)
     {

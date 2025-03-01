@@ -37,19 +37,15 @@ MYSQL* SqlConnPool::GetConn()
 void SqlConnPool::FreeConn(MYSQL* sql)
 {
     assert(sql);
-    {
-        lock_guard<mutex> locker(this->mtx);
-        connQue.push(sql);
-        sem_post(&semID);
-    }
+    lock_guard<mutex> locker(this->mtx);
+    connQue.push(sql);
+    sem_post(&semID);
 }
 
 int SqlConnPool::GetFreeConnCount()
 {
-    {
-        lock_guard<mutex> locker(this->mtx);
-        return static_cast<int>(connQue.size());
-    }
+    lock_guard<mutex> locker(this->mtx);
+    return static_cast<int>(connQue.size());
 }
 
 void SqlConnPool::init(const char* host, int port,
@@ -74,22 +70,20 @@ void SqlConnPool::init(const char* host, int port,
         connQue.push(sql);
     }
     this->MAX_CONN = connSize;
-    sem_init(&this->semID, 0, MAX_CONN);
+    sem_init(&semID, 0, MAX_CONN);
 
 }
 
 void SqlConnPool::ClosePool()
 {
+    lock_guard<mutex> locker(this->mtx);
+    while (!connQue.empty())
     {
-        lock_guard<mutex> locker(this->mtx);
-        while (!connQue.empty())
-        {
-            auto item = connQue.front();
-            connQue.pop();
-            mysql_close(item);
-        }
-        mysql_library_end();
+        auto item = connQue.front();
+        connQue.pop();
+        mysql_close(item);
     }
+    mysql_library_end();
 }
 
 SqlConnPool::SqlConnPool()

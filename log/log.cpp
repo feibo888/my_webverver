@@ -8,6 +8,7 @@
 
 using namespace std;
 
+
 void Log::init(int level = 1, const char* path, const char* suffix, int maxQueueCapacity)
 {
     isOpen_ = true;
@@ -49,15 +50,31 @@ void Log::init(int level = 1, const char* path, const char* suffix, int maxQueue
         buff_.RetrieveAll();
         //关闭旧文件
         //如果 fp_ 已打开，先调用 flush() 将缓冲数据写入文件，再用 fclose(fp_) 关闭。
-        if (file_.is_open())
+        // if (fp_)
+        // {
+        //     flush();
+        //     fclose(fp_);
+        // }
+
+        if (file_.is_open())  // 如果文件已打开，先关闭
         {
-            flush();
+            file_.flush();
             file_.close();
         }
+        
 
         //追加模式打开
+        // fp_ = fopen(fileName, "a");
+        // if (fp_ == nullptr) //打开失败则创建目录，赋予权限777，以便能在path下创建文件
+        // {
+        //     mkdir(path_, 0777);
+        //     fp_ = fopen(fileName, "a");
+        // }
+        // assert(fp_ != nullptr);
+
+        // 以追加模式打开文件
         file_.open(fileName, std::ios::app);
-        if (!file_.is_open()) //打开失败则创建目录，赋予权限777，以便能在path下创建文件
+        if (!file_.is_open())  // 打开失败则创建目录并重试
         {
             mkdir(path_, 0777);
             file_.open(fileName, std::ios::app);
@@ -111,7 +128,12 @@ void Log::write(int level, const char* format, ...)
         }
 
         locker.lock();
-        flush();
+        // flush();
+        // fclose(fp_);
+        // fp_ = fopen(newFile, "a");
+        // assert(fp_ != nullptr);
+
+        file_.flush();
         file_.close();
         file_.open(newFile, std::ios::app);
         assert(file_.is_open());
@@ -134,19 +156,23 @@ void Log::write(int level, const char* format, ...)
         va_end(vaList);
 
         buff_.HasWritten(m);
-        //buff_.Append("\n", 2);
+        //buff_.Append("\n\0", 2);
         buff_.Append("\n", 1);
 
         if (isAsync_ && deque_ && !deque_->full())
         {
             // 如果启用且队列未满，推入队列 deque_。
             //将buff中还没有读取的数据拿出来，然后清空buff
+            //cout << "Pushing LogID: " << lineCount_ << " to queue" << endl; // 调试输出
             deque_->push_back(buff_.RetrieveAllToStr());
         }
         else
         {
             // 直接用 fputs 写入文件
-            file_ << buff_.Peek() << std::flush;
+            //fputs(buff_.Peek(), fp_);
+        
+            file_ << buff_.Peek();  // 直接写入文件流
+
             //fputs(buff_.Peek(), fp_);
         }
         // 重置缓冲区
@@ -160,7 +186,8 @@ void Log::flush()
     {
         deque_->flush();
     }
-    file_.flush();
+    //fflush(fp_);
+    file_.flush();  // 刷新文件流
 }
 
 int Log::GetLevel()
@@ -175,36 +202,22 @@ void Log::SetLevel(int level)
     level_ = level;
 }
 
-Log::Log() : lineCount_(0), isAsync_(false), writeThread_(nullptr), deque_(nullptr), toDay_(0), fp_(nullptr)
+Log::Log() : lineCount_(0), isAsync_(false), writeThread_(nullptr), deque_(nullptr), toDay_(0)
 {
 }
 
 void Log::AppendLogLevelTitle(int level)
 {
-    string str = "";
+    //string str;
     switch (level)
     {
-    case 0:
-        str = "[DEBUG]: ";
-        buff_.Append(str);
-        break;
-    case 1:
-        str = "[INFO]:  ";
-        buff_.Append(str);
-        break;
-    case 2:
-        str = "[WARN]:  ";
-        buff_.Append(str);
-        break;
-    case 3:
-        str = "[ERROR]: ";
-        buff_.Append(str);
-        break;
-    default:
-        str = "[ERROR]: ";
-        buff_.Append(str);
-        break;
+        case 0: buff_.Append("[DEBUG]: ", 9); break;
+        case 1: buff_.Append("[INFO] : ", 9); break;
+        case 2: buff_.Append("[WARN] : ", 9); break;
+        case 3: buff_.Append("[ERROR]: ", 9); break;
+        default: buff_.Append("[INFO] : ", 9); break;
     }
+    //buff_.Append(str.c_str(), str.length());
 }
 
 Log::~Log()
@@ -218,10 +231,17 @@ Log::~Log()
         deque_->Close();
         writeThread_->join();
     }
+    // if (fp_)
+    // {
+    //     lock_guard<mutex> locker(mtx_);
+    //     flush();
+    //     fclose(fp_);
+    // }
+
     if (file_.is_open())
     {
         lock_guard<mutex> locker(mtx_);
-        flush();
+        file_.flush();
         file_.close();
     }
 }
@@ -231,11 +251,9 @@ void Log::AsyncWrite_()
     string str = "";
     while (deque_->pop(str))
     {
-        lock_guard<mutex> locker(mtx_);
-        cout << str << endl;
-        //fwrite(str.data(), 1, str.size(), fp_);
+        lock_guard<mutex> locker(mtx_);     //虽然写线程只有一个，但是当队列满的时候主线程会直接写文件，所以需要上锁
         //fputs(str.c_str(), fp_);
-        //fflush(fp_);
-        file_ << str << std::flush;
+        file_ << str;  // 异步写入文件流
+        //file_.flush();
     }
 }

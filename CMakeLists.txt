@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.16.3)
 project(my_webServer)
 
-set(CMAKE_CXX_STANDARD 17)
-
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")  # 添加 -O3 优化
 
 include_directories(/usr/include/mysql)
 #find_package(MySQL REQUIRED)

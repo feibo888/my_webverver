@@ -93,6 +93,8 @@ void Buffer::Append(const char* str, size_t len)
 
 void Buffer::Append(const void* data, size_t len)
 {
+    assert(data);
+    Append(static_cast<const char*>(data), len);
 }
 
 void Buffer::Append(const Buffer& buff)
@@ -110,7 +112,7 @@ ssize_t Buffer::ReadFd(int fd, int* saveErrno)
     iov[0].iov_base = BeginPtr_() + writePos_;
     iov[0].iov_len = writable;
     iov[1].iov_base = buff;
-    iov[1].iov_len = writable;
+    iov[1].iov_len = sizeof(buff);
 
     const ssize_t len = readv(fd, iov, 2);
     if (len < 0)

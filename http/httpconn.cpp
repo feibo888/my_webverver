@@ -93,8 +93,8 @@ void HttpConn::Close()
         isClose_ = true;
         userCount--;
         close(fd_);
+        LOG_INFO("Client[%d](%s:%d) quit, UserCount:%d", fd_, GetIP(), GetPort(), (int)userCount);
     }
-    LOG_INFO("Client[%d](%s:%d) quit, UserCount:%d", fd_, GetIP(), GetPort(), (int)userCount);
 }
 
 int HttpConn::GetFd() const

@@ -63,7 +63,7 @@ bool HttpRequest::parse(Buffer& buff)
         }
         if (lineEnd == buff.BeginWriteConst())
         {
-            buff.RetrieveUntil(lineEnd);
+            buff.RetrieveUntil(lineEnd);        //更新readPos_，否则会再次读取一个空行
             state_ = FINISH;
             break;
         }
@@ -251,8 +251,9 @@ void HttpRequest::ParseFromUrlencoded_()
             if (i + 2 >= n) break;  // 防止越界
             num = ConverHex(body_[i + 1]) * 16 + ConverHex(body_[i + 2]);
             body_[i] = static_cast<char>(num);  // 替换为 ASCII 字符
-            body_.erase(i + 1, 2);             // 删除 % 后的两个字符
-            n = body_.size();                   // 更新总长度
+            //body_.erase(i + 1, 2);             // 删除 % 后的两个字符
+            //n = body_.size();                   // 更新总长度
+            i += 2;
             break;
 
 
@@ -285,11 +286,12 @@ bool HttpRequest::UserVerify(const std::string& name, const std::string& pwd, bo
 {
     if (name == "" || pwd == "") return false;
     LOG_INFO("Verify name:%s pwd:%s", name.c_str(), pwd.c_str());
-    cout << name << " " << pwd << endl;
+    //cout << name << " " << pwd << endl;
 
     // 从数据库连接池中获取一个MySQL连接
     MYSQL* sql;
     SqlConnRAll guard(&sql, SqlConnPool::Instance());
+    //SqlConnRAll(&sql,  SqlConnPool::Instance());
     //sql = SqlConnPool::Instance()->GetConn();
     assert(sql);
 
@@ -308,7 +310,7 @@ bool HttpRequest::UserVerify(const std::string& name, const std::string& pwd, bo
     //查询用户及密码
     snprintf(order, 256, "SELECT username, password FROM user WHERE username='%s' LIMIT 1", name.c_str());
     LOG_DEBUG("%s", order);
-    cout << order << endl;
+    //cout << order << endl;
 
     // 执行查询
     if (mysql_query(sql, order))

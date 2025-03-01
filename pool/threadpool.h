@@ -19,8 +19,9 @@ public:
     {
         assert(threadCount > 0);
         for (size_t i = 0; i < threadCount; ++i)
-        {
-            std::thread([pool = pool_]  //按值访问pool,线程数量为8时，共引用pool_9次
+        {   
+            //按值访问pool,线程数量为8时，共引用pool_9次
+            std::thread([pool = pool_]  
             {
                 std::unique_lock<std::mutex> locker(pool->mtx);
                 while (true)
@@ -31,6 +32,7 @@ public:
                         pool->tasks.pop();
                         locker.unlock();
                         task();
+                        //std::cout << std::this_thread::get_id() << std::endl;
                         locker.lock();
                     }
                     else if (pool->isClosed) break;

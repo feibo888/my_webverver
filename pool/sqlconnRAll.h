@@ -16,7 +16,7 @@ public:
     {
         assert(connpool);
         *sql = connpool->GetConn();
-        this->sql_ = *sql;
+        sql_ = *sql;
         connPool_ = connpool;
     }
 
