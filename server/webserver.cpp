@@ -17,7 +17,7 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool OptLinger,
     //资源路径（前端）
     srcDir = getcwd(nullptr, 256);
     assert(srcDir);
-    strncat(srcDir, "/../resources/", 16);
+    strncat(srcDir, "/resources/", 16);
 
     //usercount原子操作，存储当前连接的用户数量
     //HttpConn::userCount.store(0);

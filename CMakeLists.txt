@@ -18,6 +18,8 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/pool POLL_SRC)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/server SERVER_SRC)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/timer TIMER_SRC)
 
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
 add_executable(${PROJECT_NAME}
                 main.cpp
                 ${BUFFER_SRC}
