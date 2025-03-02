@@ -2,35 +2,29 @@ cmake_minimum_required(VERSION 3.16.3)
 project(my_webServer)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")  # 添加 -O3 优化
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+
+find_package(Boost REQUIRED COMPONENTS regex)
+include_directories(${Boost_INCLUDE_DIRS})
+if (Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+endif()
 
 include_directories(/usr/include/mysql)
-#find_package(MySQL REQUIRED)
-#include_directories(${MYSQL_INCLUDE_DIRS})
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/buffer BUFFER_SRC)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/http HTTP_SRC)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/log LOG_SRC)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/pool POLL_SRC)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/server SERVER_SRC)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/timer TIMER_SRC)
 
-add_executable(my_webServer main.cpp
-        server/webserver.h
-        server/webserver.cpp
-        server/epoller.h
-        server/epoller.cpp
-        pool/sqlconnpool.h
-        pool/sqlconnpool.cpp
-        log/log.h
-        pool/sqlconnRAll.h
-        pool/threadpool.h
-        http/httpconn.h
-        http/httpconn.cpp
-        http/httprequest.h
-        http/httprequest.cpp
-        http/httpresponse.h
-        http/httpresponse.cpp
-        buffer/buffer.h
-        timer/heaptimer.h
-        timer/heaptimer.cpp
-        buffer/buffer.cpp
-        log/blockqueue.h
-        log/log.cpp
-)
+add_executable(${PROJECT_NAME}
+                main.cpp
+                ${BUFFER_SRC}
+                ${HTTP_SRC}
+                ${LOG_SRC}
+                ${POLL_SRC}
+                ${SERVER_SRC}
+                ${TIMER_SRC})
 
-
-target_link_libraries(my_webServer mysqlclient pthread)
+target_link_libraries(${PROJECT_NAME} mysqlclient pthread Boost::regex)

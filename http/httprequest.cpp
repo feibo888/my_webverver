@@ -136,9 +136,9 @@ bool HttpRequest::ParseRequestLine_(const std::string& line)
 {
     LOG_DEBUG("Raw request line: |%s|", line.c_str()); // 调试日志
 
-    regex patten("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$" );
-    smatch subMatch;
-    if (regex_match(line, subMatch, patten))
+    boost::regex patten("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$" );
+    boost::smatch subMatch;
+    if (boost::regex_match(line, subMatch, patten))
     {
         method_ = subMatch[1];
         path_ = subMatch[2];
@@ -154,9 +154,9 @@ bool HttpRequest::ParseRequestLine_(const std::string& line)
 
 void HttpRequest::ParseHeader_(const std::string& line)
 {
-    regex patten("^([^:]*): ?(.*)$");
-    smatch subMatch;
-    if (regex_match(line, subMatch, patten))
+    boost::regex patten("^([^:]*): ?(.*)$");
+    boost::smatch subMatch;
+    if (boost::regex_match(line, subMatch, patten))
     {
         header_[subMatch[1]] = subMatch[2];
         // string header_name = subMatch[1];

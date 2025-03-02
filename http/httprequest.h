@@ -12,6 +12,7 @@
 #include <regex>
 #include <errno.h>
 #include <mysql/mysql.h>  //mysql
+#include <boost/regex.hpp>
 
 #include "../buffer/buffer.h"
 #include "../log/log.h"
