@@ -66,6 +66,10 @@ void SqlConnPool::init(const char* host, int port,
         if (!sql)
         {
             LOG_ERROR("MySql Connect error!");
+            sleep(1);
+            i--;  // 重试当前迭代
+            //cout << "11111" << endl;
+            continue;
         }
         connQue.push(sql);
     }

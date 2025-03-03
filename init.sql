@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS user (
 ) ENGINE=InnoDB;
 
 -- 插入初始数据
-INSERT INTO user (username, password) VALUES ('root', '54188heihei');
+INSERT INTO user (username, password) VALUES ('root', '123456');

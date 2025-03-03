@@ -25,7 +25,8 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool OptLinger,
     HttpConn::srcDir = this->srcDir;
 
     //初始化连接池
-    SqlConnPool::Instance()->init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
+    const char* host = getenv("MYSQL_HOST") ? getenv("MYSQL_HOST") : "localhost";
+    SqlConnPool::Instance()->init(host, sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
 
     //设置触发模式
     InitEventMode_(trigMode);
